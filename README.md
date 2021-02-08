@@ -26,9 +26,9 @@ so in order to avoid re-generating the `Point` every time, a convenience `Pair` 
 The signature generated is stored in a `Sig` structure, however, to separate the chain's data structures
 from the crypto code, `Sig` can convert to a `Signature` (see `agora.crypto.Types`) via the `toBlob` method.
 
-The main interface for this modules are the various `sign` function, which can be used in
+The main interface for this module are the various `sign` functions, which can be used in
 a pedestrian way (e.g. `Pair kp = Pair.random(); sign(kp, "Message");`), or in a more complex fashion
-(using a specific `r`, or even different scalar and points altogethers, to allow for multisig schemes).
+(using a specific `r`, or even different scalar and points altogether, to allow for multisig schemes).
 
 ## [`agora.crypto.Types`](https://github.com/bpfkorea/crypto/blob/v0.x.x/source/agora/crypto/Types.d)
 
