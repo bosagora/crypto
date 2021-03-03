@@ -196,6 +196,52 @@ public void hashPart (T) (scope const auto ref T record, scope HashDg hasher)
 
 /*******************************************************************************
 
+    Call the provided delegate with a `HashDg`, allowing custom hash logic
+
+    This allow users to do some hash aggregation without relying on `hashMulti`,
+    but without the attributes restrictions of `hashPart`.
+
+    Params:
+      T = Type of predicate (delegate / function) to run
+      record = Instance of `T` to hash
+      state  = State delegate, when this struct is nested in another.
+
+    Returns:
+      The `Hash` representing this instance
+
+*******************************************************************************/
+
+public Hash hashPred (T) (scope T pred)
+{
+    static assert (is(T : void delegate (scope HashDg)) ||
+                   is(T : void function (scope HashDg)),
+                   T.stringof ~
+                   " does not implicitly convert to `void delegate (scope HashDg)`");
+
+    Hash hash = void;
+    crypto_generichash_state state;
+
+    void trustedInit () @trusted
+    {
+        crypto_generichash_init(&state, null, 0, Hash.sizeof);
+    }
+    trustedInit();
+
+    scope HashDg dg = (in ubyte[] data) @trusted {
+        crypto_generichash_update(&state, data.ptr, data.length);
+    };
+
+    pred(dg);
+    void trustedFini () @trusted
+    {
+        crypto_generichash_final(&state, hash[].ptr, Hash.sizeof);
+    }
+    trustedFini();
+    return hash;
+}
+
+/*******************************************************************************
+
     Hash the variable-length binary format of an unsigned integer
 
     VarInt Size
@@ -313,27 +359,10 @@ nothrow @nogc @safe unittest
 
 public Hash hashMulti (T...)(auto ref T args) nothrow @nogc @safe
 {
-    Hash hash = void;
-    crypto_generichash_state state;
-
-    void trustedInit () @trusted
-    {
-        crypto_generichash_init(&state, null, 0, Hash.sizeof);
-    }
-    trustedInit();
-
-    scope HashDg dg = (in ubyte[] data) @trusted {
-        crypto_generichash_update(&state, data.ptr, data.length);
-    };
-
-    static foreach (idx, _; args)
-        hashPart(args[idx], dg);
-    void trusted () @trusted
-    {
-        crypto_generichash_final(&state, hash[].ptr, Hash.sizeof);
-    }
-    trusted();
-    return hash;
+    return hashPred((scope HashDg dg) {
+        static foreach (idx, _; args)
+            hashPart(args[idx], dg);
+    });
 }
 
 ///
