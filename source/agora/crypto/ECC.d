@@ -276,8 +276,8 @@ public struct Scalar
         return ret;
     }
 
-    /// Convenience overload to allow this to be converted to a BitBlob
-    public const(ubyte)[] opSlice () const pure
+    /// Convenience overload to allow this to be passed to libsodium & co
+    public inout(ubyte)[] opSlice () inout pure
     {
         return this.data[];
     }
@@ -406,8 +406,8 @@ public struct Point
         return result;
     }
 
-    /// Convenience overload to allow this to be converted to a `PublicKey`
-    public const(ubyte)[] opSlice () const pure
+    /// Convenience overload to allow this to be passed to libsodium & co
+    public inout(ubyte)[] opSlice () inout pure
     {
         return this.data[];
     }
