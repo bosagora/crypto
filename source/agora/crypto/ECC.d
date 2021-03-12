@@ -112,7 +112,7 @@ public struct Scalar
     @safe:
 
     /// Internal state
-    package BitBlob!(crypto_core_ed25519_SCALARBYTES * 8) data;
+    package BitBlob!(crypto_core_ed25519_SCALARBYTES) data;
 
     /***************************************************************************
 
@@ -260,8 +260,8 @@ public struct Scalar
     /// Scalar should be greater than zero and less than L:2^252 + 27742317777372353535851937790883648493
     public bool isValid () const
     {
-        const auto ED25519_L =  BitBlob!256("0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed");
-        const auto ZERO =       BitBlob!256("0x0000000000000000000000000000000000000000000000000000000000000000");
+        const auto ED25519_L =  BitBlob!32("0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed");
+        const auto ZERO =       BitBlob!32("0x0000000000000000000000000000000000000000000000000000000000000000");
         return this.data > ZERO && this.data < ED25519_L;
     }
 
@@ -323,7 +323,7 @@ public struct Point
     @safe:
 
     /// Internal state
-    package BitBlob!(crypto_core_ed25519_BYTES * 8) data;
+    package BitBlob!(crypto_core_ed25519_BYTES) data;
 
     /// Expose `toString`
     public void toString (scope void delegate(scope const(char)[]) @safe dg)
