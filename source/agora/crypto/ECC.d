@@ -69,6 +69,36 @@ nothrow @nogc unittest
     assert(G + pZero == G);
 }
 
+/// Contains a scalar and its projection on the elliptic curve (`v` and `v.G`)
+public struct Pair
+{
+    /// A PRNGenerated number
+    public Scalar v;
+    /// v.G
+    public Point V;
+
+    /// Construct a Pair from a Scalar
+    public static Pair fromScalar (in Scalar v) nothrow @nogc @safe
+    {
+        return Pair(v, v.toPoint());
+    }
+
+    /// Generate a random value `v` and a point on the curve `V` where `V = v.G`
+    public static Pair random () nothrow @nogc @safe
+    {
+        return Pair.fromScalar(Scalar.random());
+    }
+}
+
+// Test constructing Pair from scalar
+unittest
+{
+    const Scalar s = Scalar.random();
+    const pair1 = Pair(s, s.toPoint());
+    const pair2 = Pair.fromScalar(s);
+    assert(pair1 == pair2);
+}
+
 /*******************************************************************************
 
     A field element in the finite field of order 2^255-19
