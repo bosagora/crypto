@@ -73,7 +73,7 @@ nothrow @nogc @safe unittest
 
     const sig1 = sign(kp1.v, X, R, R1.v, secret);
     const sig2 = sign(kp2.v, X, R, R2.v, secret);
-    const sig3 = Sig(R, sig1.s + sig2.s);
+    const sig3 = Signature(R, sig1.s + sig2.s);
 
     // No one can verify any of those individually
     assert(!verify(kp1.V, sig1, secret));
@@ -99,7 +99,7 @@ nothrow @nogc @safe unittest
 
 *******************************************************************************/
 
-public Point extractNonce (Sig sig) @safe @nogc nothrow pure
+public Point extractNonce (Signature sig) @safe @nogc nothrow pure
 {
     return sig.R;
 }
@@ -121,14 +121,17 @@ public Point extractNonce (Sig sig) @safe @nogc nothrow pure
 
 *******************************************************************************/
 
-public struct Sig
+public struct Signature
 {
     /// Commitment
     public Point R;
     /// Proof
     public Scalar s;
 
-    static assert(Signature.sizeof == typeof(this).sizeof);
+    import libsodium: crypto_sign_ed25519_BYTES;
+    import geod24.bitblob;
+
+    static assert(Signature.sizeof == crypto_sign_ed25519_BYTES);
 
     /// construct from Point and Scalar
     public this (in Point R, in Scalar s) pure nothrow @nogc @safe
@@ -141,28 +144,13 @@ public struct Sig
     {
         import std.format;
 
-        auto R = Point("0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693");
+        const R = Point("0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693");
         assert(R.isValid()); // valid Point
-        auto s = Scalar("0x074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216");
+        const s = Scalar("0x074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216");
         assert(s.isValid()); // valid Scalar
-        auto sig = Sig(R, s);
-        assert(sig.R == R, R.toString());
-        assert(sig.s == s, s.toString(PrintMode.Clear));
-    }
-
-    /// Converts this signature to a BitBlob matching `agora.common.Types`
-    public Signature toBlob () const pure nothrow @nogc @safe
-    {
-        typeof(return) ret;
-        ret[0 .. Point.sizeof][] = this.R.data[];
-        ret[Point.sizeof .. $][] = this.s.data[];
-        return ret;
-    }
-
-    /// Deserialize a binary blob into a signature
-    public static Sig fromBlob (in Signature s) pure nothrow @nogc @safe
-    {
-        return Sig(Point(s[0 .. Point.sizeof]), Scalar(s[Point.sizeof .. $]));
+        const sig = Signature(R, s);
+        assert(sig.R == R, sig.R.toString());
+        assert(sig.s == s, sig.s.toString(PrintMode.Clear));
     }
 }
 
@@ -175,7 +163,7 @@ private struct Message (T)
 }
 
 /// Single-signer trivial API
-public Sig sign (T) (in Pair kp, scope const auto ref T data)
+public Signature sign (T) (in Pair kp, scope const auto ref T data)
     nothrow @nogc @safe
 {
     const R = Pair.random();
@@ -183,7 +171,7 @@ public Sig sign (T) (in Pair kp, scope const auto ref T data)
 }
 
 /// Single-signer privkey API
-public Sig sign (T) (in Scalar privateKey, scope const auto ref T data)
+public Signature sign (T) (in Scalar privateKey, scope const auto ref T data)
     nothrow @nogc @safe
 {
     const R = Pair.random();
@@ -191,13 +179,13 @@ public Sig sign (T) (in Scalar privateKey, scope const auto ref T data)
 }
 
 /// Sign with a given `r` (warning: `r` should never be reused with `x`)
-public Sig sign (T) (in Pair kp, in Pair r, scope const auto ref T data)
+public Signature sign (T) (in Pair kp, in Pair r, scope const auto ref T data)
 {
     return sign!T(kp.v, kp.V, r.V, r.v, data);
 }
 
 /// Complex API, allow multisig (not including multisig threshold)
-public Sig sign (T) (
+public Signature sign (T) (
     in Scalar x, in Point X, in Point R, in Scalar r, scope const auto ref T data)
     nothrow @nogc @trusted
 {
@@ -224,7 +212,7 @@ public Sig sign (T) (
 }
 
 /// sign with prepared message hash `c` (used for multisig with threshold)
-public Sig sign (in Scalar x, in Point R, in Scalar r, in Scalar c)
+public Signature sign (in Scalar x, in Point R, in Scalar r, in Scalar c)
     nothrow @nogc @trusted
 {
     /*
@@ -241,7 +229,7 @@ public Sig sign (in Scalar x, in Point R, in Scalar r, in Scalar c)
      */
     // Compute `s` part of the proof
     Scalar s = r + (c * x);
-    return Sig(R, s);
+    return Signature(R, s);
 }
 /*******************************************************************************
 
@@ -258,7 +246,7 @@ public Sig sign (in Scalar x, in Point R, in Scalar r, in Scalar c)
 
 *******************************************************************************/
 
-public bool verify (T) (in Point X, in Sig sig, scope const auto ref T data)
+public bool verify (T) (in Point X, in Signature sig, scope const auto ref T data)
     nothrow @nogc @trusted
 {
     // Compute the challenge and reduce the hash to a scalar
@@ -266,7 +254,7 @@ public bool verify (T) (in Point X, in Sig sig, scope const auto ref T data)
     return verify(sig, c, X);
 }
 /// verify with predefined message hash `c` (required for threshold multisig)
-public bool verify (in Sig sig, in Scalar c, in Point X)
+public bool verify (in Signature sig, in Scalar c, in Point X)
     nothrow @nogc @trusted
 {
     // First check if Scalar from signature is valid
@@ -317,7 +305,7 @@ nothrow @nogc @safe unittest
 {
     Pair kp = Pair.fromScalar(Scalar(`0x074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216`));
     static immutable string message = "Bosagora:-)";
-    Sig signature;
+    Signature signature;
     assert(!verify(kp.V, signature, message));
 }
 
@@ -351,7 +339,7 @@ nothrow @nogc @safe unittest
     Pair kp = Pair.fromScalar(Scalar(`0x074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216`));
     static immutable string message = "Bosagora:-)";
     auto signature = sign(kp, message);
-    Sig invalid_sig = Sig(Point("0xab4f6f6e85b8d0d38f5d5798a4bdc4dd444c8909c8a5389d3bb209a18610511c"),
+    Signature invalid_sig = Signature(Point("0xab4f6f6e85b8d0d38f5d5798a4bdc4dd444c8909c8a5389d3bb209a18610511c"),
         signature.s);
     assert(verify(kp.V, signature, message));
     assert(!verify(kp.V, invalid_sig, message));
@@ -402,11 +390,11 @@ nothrow @nogc @safe unittest
 }
 
 /// multi-sig combine
-public Sig multiSigCombine (S)(const S sigs) nothrow @nogc @safe
+public Signature multiSigCombine (S)(const S sigs) nothrow @nogc @safe
 {
     Point sum_R = sigs.map!(x => x.R).sum(Point.init);
     Scalar sum_s = sigs.map!(x => x.s).sum(Scalar.init);
-    return Sig(sum_R, sum_s);
+    return Signature(sum_R, sum_s);
 }
 
 /// testing multiSig for block signing
@@ -431,26 +419,26 @@ public Sig multiSigCombine (S)(const S sigs) nothrow @nogc @safe
     Scalar c = hashFull(const(Message!Scalar)(sum_X, sum_R, data));
 
     // first signer
-    const Sig sig1 = sign(kp1_X.v, kp1_R.V, kp1_R.v, c);
+    const Signature sig1 = sign(kp1_X.v, kp1_R.V, kp1_R.v, c);
 
     // second signer
-    const Sig sig2 = sign(kp2_X.v, kp2_R.V, kp2_R.v, c);
+    const Signature sig2 = sign(kp2_X.v, kp2_R.V, kp2_R.v, c);
 
     // verification of individual signatures
     assert(verify(sig1, c, kp1_X.V));
     assert(verify(sig2, c, kp2_X.V));
 
     // "multi-sig" - collection of one or more signatures
-    Sig two_sigs = multiSigCombine([ sig1, sig2 ]);
+    Signature two_sigs = multiSigCombine([ sig1, sig2 ]);
 
     // verification of two combined signatures
     assert(verify(two_sigs, c, kp1_X.V + kp2_X.V));
 
     // Now add one more signature
-    const Sig sig3 = sign(kp3_X.v, kp3_R.V, kp3_R.v, c);
+    const Signature sig3 = sign(kp3_X.v, kp3_R.V, kp3_R.v, c);
 
     // add third sig to the already combined two sigs
-    Sig three_sigs = multiSigCombine([ two_sigs, sig3 ]);
+    Signature three_sigs = multiSigCombine([ two_sigs, sig3 ]);
 
     assert(verify(three_sigs, c, sum_X));
 
