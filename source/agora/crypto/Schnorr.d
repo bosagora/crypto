@@ -183,7 +183,7 @@ public Signature sign (T) (in Pair kp, in Pair r, scope const auto ref T data)
 /// Complex API, allow multisig (not including multisig threshold)
 public Signature sign (T) (
     in Scalar x, in Point X, in Point R, in Scalar r, scope const auto ref T data)
-    nothrow @nogc @trusted
+    nothrow @nogc @safe
 {
     /*
       G := Generator point:
@@ -209,7 +209,7 @@ public Signature sign (T) (
 
 /// sign with prepared message hash `c` (used for multisig with threshold)
 public Signature sign (in Scalar x, in Point R, in Scalar r, in Scalar c)
-    nothrow @nogc @trusted
+    nothrow @nogc @safe
 {
     /*
       G := Generator point:
@@ -243,7 +243,7 @@ public Signature sign (in Scalar x, in Point R, in Scalar r, in Scalar c)
 *******************************************************************************/
 
 public bool verify (T) (in Point X, in Signature sig, scope const auto ref T data)
-    nothrow @nogc @trusted
+    nothrow @nogc @safe
 {
     // Compute the challenge and reduce the hash to a scalar
     Scalar c = hashFull(const(Message!T)(X, sig.R, data));
@@ -251,7 +251,7 @@ public bool verify (T) (in Point X, in Signature sig, scope const auto ref T dat
 }
 /// verify with predefined message hash `c` (required for threshold multisig)
 public bool verify (in Signature sig, in Scalar c, in Point X)
-    nothrow @nogc @trusted
+    nothrow @nogc @safe
 {
     // First check if Scalar from signature is valid
     if (!sig.s.isValid())
