@@ -140,6 +140,15 @@ public struct Signature
         this.s = s;
     }
 
+    static Signature fromString (scope const(char)[] hex_str)
+    {
+        static const length = Point.sizeof + Scalar.sizeof;
+        const bytes = BitBlob!(length)(hex_str); // the bytes are little endian
+        const Point R = bytes[Scalar.sizeof .. length];
+        const Scalar s = bytes[0 .. Scalar.sizeof];
+        return Signature(R, s);
+    }
+
     unittest
     {
         import std.format;
@@ -151,6 +160,10 @@ public struct Signature
         const sig = Signature(R, s);
         assert(sig.R == R, sig.R.toString());
         assert(sig.s == s, sig.s.toString(PrintMode.Clear));
+        const signature = Signature.fromString("0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216");
+        assert(signature.R == sig.R, signature.R.toString);
+        assert(signature.s == sig.s, signature.s.toString(PrintMode.Clear));
+        assert(sig == signature);
     }
 }
 
