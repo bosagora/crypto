@@ -87,30 +87,13 @@ nothrow @nogc @safe unittest
     assert(verify(X, sig3, secret));
 }
 
-/*******************************************************************************
-
-    Extract the R from (R, s) of a binary representation of a signature
-
-    Params:
-        sig = the binary representation of the schnorr signature
-
-    Returns:
-        the R from the (R, s) pair
-
-*******************************************************************************/
-
-public Point extractNonce (Signature sig) @safe @nogc nothrow pure
-{
-    return sig.R;
-}
-
 ///
 @safe @nogc nothrow /*pure*/ unittest
 {
     const R = Pair.random();
     const kp = Pair.random();
     const sig = sign(kp.v, kp.V, R.V, R.v, "foo");
-    assert(extractNonce(sig) == R.V);
+    assert(sig.R == R.V);
 }
 
 /*******************************************************************************
