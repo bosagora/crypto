@@ -96,14 +96,7 @@ nothrow @nogc @safe unittest
     assert(sig.R == R.V);
 }
 
-/*******************************************************************************
-    Represent a signature (R, s)
-
-    Note that signatures get passed around as binary blobs
-    (see `agora.common.Types`), so this type is named `Sig` to avoid ambiguity.
-
-*******************************************************************************/
-
+/// Represent a schnorr signature (R, s)
 public struct Signature
 {
     /// Commitment
