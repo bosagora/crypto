@@ -48,6 +48,7 @@ import agora.crypto.Hash;
 import agora.crypto.ECC;
 
 import std.algorithm;
+import std.format;
 import std.range;
 
 
@@ -99,6 +100,8 @@ nothrow @nogc @safe unittest
 /// Represent a schnorr signature (R, s)
 public struct Signature
 {
+    @safe:
+
     /// Commitment
     public Point R;
     /// Proof
@@ -117,7 +120,7 @@ public struct Signature
     }
 
     /// construct from hex string
-    static Signature fromString (scope const(char)[] hex_str) pure nothrow @nogc @safe
+    static Signature fromString (scope const(char)[] hex_str) pure nothrow @nogc
     {
         static const length = Point.sizeof + Scalar.sizeof;
         const bytes = BitBlob!(length)(hex_str); // the bytes are little endian
@@ -134,6 +137,32 @@ public struct Signature
             Scalar("0x074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216"));
         const signature = Signature.fromString("0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216");
         assert(sig == signature);
+    }
+
+    /// print to hex string
+    public void toString (scope void delegate(scope const(char)[]) @safe sink) const
+    {
+        this.R.data.toString(sink);
+        FormatSpec!char spec;
+        spec.spec = 'x';
+        this.s.data.toString(sink, spec);
+    }
+
+    /// Ditto
+    public string toString () const
+    {
+        string result;
+        this.toString((scope data) { result ~= data; });
+        return result;
+    }
+
+    ///
+    unittest
+    {
+        const signature = Signature(
+            Point("0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693"),
+            Scalar("0x074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216"));
+        assert(signature.toString() == "0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216", signature.toString());
     }
 }
 
