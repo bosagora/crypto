@@ -9,7 +9,7 @@
     "targetType": "library",
 
     "dependencies": {
-        "bitblob": "~>2.0",
+        "bitblob": "~>2.1",
         "libsodiumd": "~>0.1.1+1.0.18"
     }
 }

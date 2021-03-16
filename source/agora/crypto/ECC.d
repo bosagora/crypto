@@ -129,17 +129,34 @@ public struct Scalar
 
     ***************************************************************************/
 
-    public void toString (scope void delegate(scope const(char)[]) @safe sink,
-                          PrintMode mode = PrintMode.Obfuscated) const
+    public void toString (scope void delegate(scope const(char)[]) @safe sink)
+        const
     {
-        final switch (mode)
+        FormatSpec!char spec;
+        this.toString(sink, spec);
+    }
+
+    /// Ditto
+    public void toString (scope void delegate(scope const(char)[]) @safe sink,
+                          scope const ref FormatSpec!char spec) const
+    {
+        switch (spec.spec)
         {
-        case PrintMode.Obfuscated:
+        // Default to obfuscated print mode
+        case 's':
+        default:
             formattedWrite(sink, "**SCALAR**");
             break;
 
-        case PrintMode.Clear:
-            formattedWrite(sink, "%s", this.data);
+        // Clear text was explicitly requested
+        case 'c':
+            this.data.toString(sink);
+            break;
+
+        // Modes supported by BitBlob
+        case 'x':
+        case 'X':
+            this.data.toString(sink, spec);
             break;
         }
     }
@@ -148,22 +165,29 @@ public struct Scalar
     public string toString (PrintMode mode = PrintMode.Obfuscated) const
     {
         string result;
-        this.toString((scope data) { result ~= data; }, mode);
+        FormatSpec!char spec;
+        spec.spec = (mode == PrintMode.Clear) ? 'c' : 's';
+        this.toString((scope data) { result ~= data; }, spec);
         return result;
     }
 
     ///
     unittest
     {
-        auto s = Scalar("0x0e00a8df701806cb4deac9bb09cc85b097ee713e055b9d2bf1daf668b3f63778");
+        static immutable ClearText =
+            "0x0e00a8df701806cb4deac9bb09cc85b097ee713e055b9d2bf1daf668b3f63778";
+
+        auto s = Scalar(ClearText);
 
         assert(s.toString(PrintMode.Obfuscated) == "**SCALAR**");
-        assert(s.toString(PrintMode.Clear) ==
-               "0x0e00a8df701806cb4deac9bb09cc85b097ee713e055b9d2bf1daf668b3f63778");
+        assert(s.toString(PrintMode.Clear) == ClearText);
 
         // Test default formatting behavior with writeln & format
         import std.format : format;
         assert(format("%s", s) == "**SCALAR**");
+        assert(format("%q", s) == "**SCALAR**");
+        assert(format("%c", s) == ClearText);
+        assert(format("%x", s) == ClearText[2 .. $]);
     }
 
     nothrow @nogc:
