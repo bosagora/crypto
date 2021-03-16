@@ -192,7 +192,7 @@ public struct Scalar
 
     nothrow @nogc:
 
-    private this (typeof(this.data) data)
+    private this (typeof(this.data) data) inout pure
     {
         this.data = data;
     }
@@ -364,7 +364,7 @@ public struct Point
 
     nothrow @nogc:
 
-    private this (typeof(this.data) data) pure
+    private this (typeof(this.data) data) inout pure
     {
         this.data = data;
     }
