@@ -147,7 +147,6 @@ private struct Message (T)
 
 /// Single-signer trivial API
 public Signature sign (T) (in Pair kp, scope const auto ref T data)
-    nothrow @nogc @safe
 {
     const R = Pair.random();
     return sign!T(kp.v, kp.V, R.V, R.v, data);
@@ -155,7 +154,6 @@ public Signature sign (T) (in Pair kp, scope const auto ref T data)
 
 /// Single-signer privkey API
 public Signature sign (T) (in Scalar privateKey, scope const auto ref T data)
-    nothrow @nogc @safe
 {
     const R = Pair.random();
     return sign!T(privateKey, privateKey.toPoint(), R.V, R.v, data);
@@ -170,7 +168,6 @@ public Signature sign (T) (in Pair kp, in Pair r, scope const auto ref T data)
 /// Complex API, allow multisig (not including multisig threshold)
 public Signature sign (T) (
     in Scalar x, in Point X, in Point R, in Scalar r, scope const auto ref T data)
-    nothrow @nogc @safe
 {
     /*
       G := Generator point:
@@ -230,7 +227,6 @@ public Signature sign (in Scalar x, in Point R, in Scalar r, in Scalar c)
 *******************************************************************************/
 
 public bool verify (T) (in Point X, in Signature sig, scope const auto ref T data)
-    nothrow @nogc @safe
 {
     // Compute the challenge and reduce the hash to a scalar
     Scalar c = hashFull(const(Message!T)(X, sig.R, data));
