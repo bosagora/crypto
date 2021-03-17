@@ -197,11 +197,27 @@ public struct Scalar
         this.data = data;
     }
 
-    /// Construct a scalar from its string representation or a `ubyte[]`
+    /// Construct from its string representation or a fixed length array
     public this (T) (T param)
-        if (is(typeof(this.data = typeof(this.data)(param))))
     {
         this.data = typeof(this.data)(param);
+    }
+
+    /// Construct from a dynamic array of the correct length
+    public this (ubyte[data.sizeof] param) inout pure
+    {
+        this.data = typeof(this.data)(cast(ubyte[data.sizeof])(param));
+    }
+
+    // test constructors
+    unittest
+    {
+        const ubyte[32] fixed = [57, 34, 14, 84, 18, 175, 101, 64, 121, 181, 212, 78, 23, 148, 180, 7, 9, 105, 237, 155, 78, 161, 191, 27, 97, 130, 209, 44, 202, 245, 208, 13];
+        const ubyte[34] fixed2 = [57, 34, 14, 84, 18, 175, 101, 64, 121, 181, 212, 78, 23, 148, 180, 7, 9, 105, 237, 155, 78, 161, 191, 27, 97, 130, 209, 44, 202, 245, 208, 13, 0, 0];
+        const from_fixed_array = Scalar(fixed);
+        const from_slice = Scalar(fixed2[0 .. 32]);
+        const from_ubytes = Scalar([57, 34, 14, 84, 18, 175, 101, 64, 121, 181, 212, 78, 23, 148, 180, 7, 9, 105, 237, 155, 78, 161, 191, 27, 97, 130, 209, 44, 202, 245, 208, 13]);
+        auto from_hex_str = Scalar("0x074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216");
     }
 
     /// Reduce the hash to a scalar
@@ -369,11 +385,28 @@ public struct Point
         this.data = data;
     }
 
-    /// Construct a point from its string representation or a `ubyte[]`
+    /// Construct from its string representation or a fixed length array
     public this (T) (T param)
-        if (is(typeof(this.data = typeof(this.data)(param))))
     {
         this.data = typeof(this.data)(param);
+    }
+
+    /// Construct from a dynamic array of the correct length
+    public this (ubyte[data.sizeof] param) inout pure
+    {
+        this.data = typeof(this.data)(cast(ubyte[data.sizeof])(param));
+    }
+
+    // test constructors
+    unittest
+    {
+        const ubyte[32] fixed = [204, 70, 146, 92, 85, 207, 248, 193, 36, 92, 220, 216, 252, 242, 170, 37, 89, 67, 175, 116, 170, 18, 89, 113, 241, 8, 132, 47, 250, 62, 184, 130];
+        const ubyte[34] fixed2 = [204, 70, 146, 92, 85, 207, 248, 193, 36, 92, 220, 216, 252, 242, 170, 37, 89, 67, 175, 116, 170, 18, 89, 113, 241, 8, 132, 47, 250, 62, 184, 130, 0, 0];
+        const from_fixed_array = Point(fixed);
+        const from_slice = Point(fixed2[0 .. 32]);
+        const from_ubytes = Point([204, 70, 146, 92, 85, 207, 248, 193, 36, 92, 220, 216, 252, 242, 170, 37, 89, 67, 175, 116, 170, 18, 89, 113, 241, 8, 132, 47, 250, 62, 184, 130]);
+        auto from_hex_str = Point("0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693");
+
     }
 
     /// Vibe.d deserialization
