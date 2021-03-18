@@ -112,7 +112,16 @@ public struct Signature
 
     static assert(Signature.sizeof == crypto_sign_ed25519_BYTES);
 
-    /// print to hex string
+    /***************************************************************************
+
+        Print the signature in a human-readable representation
+
+        This prints the signature as a lowercase hexadecimal string,
+        which starts with `0x` and is the hex string of the point followed by
+        the hex string of the scalar.
+
+    ***************************************************************************/
+
     public void toString (scope void delegate(scope const(char)[]) @safe sink) const
     {
         this.R.data.toString(sink);
