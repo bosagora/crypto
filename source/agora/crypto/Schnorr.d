@@ -112,47 +112,6 @@ public struct Signature
 
     static assert(Signature.sizeof == crypto_sign_ed25519_BYTES);
 
-    /// construct from Point and Scalar
-    public this (in Point R, in Scalar s) pure nothrow @nogc @safe
-    {
-        this.R = R;
-        this.s = s;
-    }
-
-    /// Construct from its string representation or a fixed length array
-    public this (T) (T param)
-    {
-        this.R = param[0 .. param.sizeof / 2];
-        this.s = param[param.sizeof / 2 .. param.sizeof];
-    }
-
-    /// Construct from a dynamic array of the correct length
-    public this (ubyte[Signature.sizeof] param) inout pure
-    {
-        this.R = param[0 .. param.sizeof / 2];
-        this.s = param[param.sizeof / 2 .. param.sizeof];
-    }
-
-    /// construct from hex string
-    static Signature fromString (scope const(char)[] hex_str) pure nothrow @nogc
-    {
-        static const length = Point.sizeof + Scalar.sizeof;
-        const bytes = BitBlob!(length)(hex_str); // the bytes are little endian
-        const Point R = bytes[Scalar.sizeof .. length];
-        const Scalar s = bytes[0 .. Scalar.sizeof];
-        return Signature(R, s);
-    }
-
-    ///
-    pure nothrow @nogc @safe unittest
-    {
-        const sig = Signature(
-            Point("0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693"),
-            Scalar("0x074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216"));
-        const signature = Signature.fromString("0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216");
-        assert(sig == signature);
-    }
-
     /// print to hex string
     public void toString (scope void delegate(scope const(char)[]) @safe sink) const
     {
@@ -177,6 +136,49 @@ public struct Signature
             Point("0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693"),
             Scalar("0x074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216"));
         assert(signature.toString() == "0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216", signature.toString());
+    }
+
+    nothrow @nogc:
+
+    /// construct from Point and Scalar
+    public this (in Point R, in Scalar s) pure
+    {
+        this.R = R;
+        this.s = s;
+    }
+
+    /// Construct from its string representation or a fixed length array
+    public this (T) (T param)
+    {
+        this.R = param[0 .. param.sizeof / 2];
+        this.s = param[param.sizeof / 2 .. param.sizeof];
+    }
+
+    /// Construct from a dynamic array of the correct length
+    public this (ubyte[Signature.sizeof] param) inout pure
+    {
+        this.R = param[0 .. param.sizeof / 2];
+        this.s = param[param.sizeof / 2 .. param.sizeof];
+    }
+
+    /// construct from hex string
+    static Signature fromString (scope const(char)[] hex_str) pure
+    {
+        static const length = Point.sizeof + Scalar.sizeof;
+        const bytes = BitBlob!(length)(hex_str); // the bytes are little endian
+        const Point R = bytes[Scalar.sizeof .. length];
+        const Scalar s = bytes[0 .. Scalar.sizeof];
+        return Signature(R, s);
+    }
+
+    ///
+    pure unittest
+    {
+        const sig = Signature(
+            Point("0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693"),
+            Scalar("0x074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216"));
+        const signature = Signature.fromString("0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216");
+        assert(sig == signature);
     }
 }
 
