@@ -107,10 +107,6 @@ public struct Signature
     /// Proof
     public Scalar s;
 
-    import libsodium: crypto_sign_ed25519_BYTES;
-
-    static assert(Signature.sizeof == crypto_sign_ed25519_BYTES);
-
     /***************************************************************************
 
         Print the signature in a human-readable representation
@@ -190,6 +186,12 @@ public struct Signature
         const signature = Signature.fromString("0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216");
         assert(sig == signature);
     }
+}
+
+unittest
+{
+    import libsodium: crypto_sign_ed25519_BYTES;
+    static assert(Signature.sizeof == crypto_sign_ed25519_BYTES);
 }
 
 /// Represent the message to hash (part of `c`)
