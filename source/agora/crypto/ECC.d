@@ -206,7 +206,7 @@ public struct Scalar
     /// Construct from a dynamic array of the correct length
     public this (ubyte[data.sizeof] param) inout pure
     {
-        this.data = typeof(this.data)(cast(ubyte[data.sizeof])(param));
+        this.data = param;
     }
 
     // test constructors
@@ -394,7 +394,7 @@ public struct Point
     /// Construct from a dynamic array of the correct length
     public this (ubyte[data.sizeof] param) inout pure
     {
-        this.data = typeof(this.data)(cast(ubyte[data.sizeof])(param));
+        this.data = param;
     }
 
     // test constructors
