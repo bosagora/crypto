@@ -151,13 +151,6 @@ public struct Signature
         this.s = s;
     }
 
-    /// Construct from its string representation or a fixed length array
-    public this (T) (T param)
-    {
-        this.R = param[0 .. param.sizeof / 2];
-        this.s = param[param.sizeof / 2 .. param.sizeof];
-    }
-
     /// Construct from a dynamic array of the correct length
     public this (in ubyte[Signature.sizeof] param) inout pure
     {
