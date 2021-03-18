@@ -36,3 +36,13 @@ This module exposes types which can be used by client code, without importing th
 modules directly (in other words, it's a leaf module).
 The aim is to reduce dependencies by allowing a data structure to include a type without gaining
 knowledge of the hashing or signing routines.
+
+## Required features
+
+This library require usage of `-preview=in`, hence the following minimum versions:
+- `dub >= 1.24`
+- `dmd >= 2.095.0`
+- `ldc >= 1.25.0`
+
+Your `dub.json` must include `dflags: [ "-preview=in" ]`.
+If it does not, linker error might be triggered in cases where `ref` is inferred.

@@ -7,9 +7,15 @@
     "copyright": "Copyright © 2021, BPF Korea",
 
     "targetType": "library",
+    "toolchainRequirements": {
+        "dub": ">=1.24.0",
+        "dmd": ">=2.095.0",
+        "gdc": "no",
+        "ldc": "~>1.25"
+    },
 
     "dependencies": {
-        "bitblob": "~>2.1",
-        "libsodiumd": "~>0.1.1+1.0.18"
+        "bitblob":    { "version": "~>2.1",          "dflags": [ "-preview=in" ] },
+        "libsodiumd": { "version": "~>0.1.1+1.0.18", "dflags": [ "-preview=in" ] }
     }
 }
