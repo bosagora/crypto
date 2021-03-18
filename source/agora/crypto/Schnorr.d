@@ -108,7 +108,6 @@ public struct Signature
     public Scalar s;
 
     import libsodium: crypto_sign_ed25519_BYTES;
-    import geod24.bitblob;
 
     static assert(Signature.sizeof == crypto_sign_ed25519_BYTES);
 
@@ -173,10 +172,12 @@ public struct Signature
     /// construct from hex string
     static Signature fromString (scope const(char)[] hex_str) pure
     {
-        static const length = Point.sizeof + Scalar.sizeof;
-        const bytes = BitBlob!(length)(hex_str); // the bytes are little endian
-        const Point R = bytes[Scalar.sizeof .. length];
+        import geod24.bitblob;
+
+        // the bytes are little endian
+        const bytes = BitBlob!(Signature.sizeof)(hex_str);
         const Scalar s = bytes[0 .. Scalar.sizeof];
+        const Point R = bytes[Scalar.sizeof .. $];
         return Signature(R, s);
     }
 
