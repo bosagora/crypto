@@ -138,7 +138,7 @@ public struct Scalar
 
     /// Ditto
     public void toString (scope void delegate(scope const(char)[]) @safe sink,
-                          scope const ref FormatSpec!char spec) const
+                          in FormatSpec!char spec) const
     {
         switch (spec.spec)
         {

@@ -155,7 +155,7 @@ public struct Signature
     }
 
     /// Construct from a dynamic array of the correct length
-    public this (ubyte[Signature.sizeof] param) inout pure
+    public this (in ubyte[Signature.sizeof] param) inout pure
     {
         this.R = param[0 .. param.sizeof / 2];
         this.s = param[param.sizeof / 2 .. param.sizeof];
@@ -191,28 +191,28 @@ private struct Message (T)
 }
 
 /// Single-signer trivial API
-public Signature sign (T) (in Pair kp, scope const auto ref T data)
+public Signature sign (T) (in Pair kp, in T data)
 {
     const R = Pair.random();
     return sign!T(kp.v, kp.V, R.V, R.v, data);
 }
 
 /// Single-signer privkey API
-public Signature sign (T) (in Scalar privateKey, scope const auto ref T data)
+public Signature sign (T) (in Scalar privateKey, in T data)
 {
     const R = Pair.random();
     return sign!T(privateKey, privateKey.toPoint(), R.V, R.v, data);
 }
 
 /// Sign with a given `r` (warning: `r` should never be reused with `x`)
-public Signature sign (T) (in Pair kp, in Pair r, scope const auto ref T data)
+public Signature sign (T) (in Pair kp, in Pair r, in T data)
 {
     return sign!T(kp.v, kp.V, r.V, r.v, data);
 }
 
 /// Complex API, allow multisig (not including multisig threshold)
 public Signature sign (T) (
-    in Scalar x, in Point X, in Point R, in Scalar r, scope const auto ref T data)
+    in Scalar x, in Point X, in Point R, in Scalar r, in T data)
 {
     /*
       G := Generator point:
@@ -271,7 +271,7 @@ public Signature sign (in Scalar x, in Point R, in Scalar r, in Scalar c)
 
 *******************************************************************************/
 
-public bool verify (T) (in Point X, in Signature sig, scope const auto ref T data)
+public bool verify (T) (in Point X, in Signature sig, in T data)
 {
     // Compute the challenge and reduce the hash to a scalar
     Scalar c = hashFull(const(Message!T)(X, sig.R, data));

@@ -108,7 +108,7 @@ private enum hasComputeHashMethod (T) = is(T == struct)
 
 *******************************************************************************/
 
-public Hash hashFull (T) (scope const auto ref T record)
+public Hash hashFull (T) (in T record)
     nothrow @nogc @trusted
 {
     Hash hash = void;
@@ -123,7 +123,7 @@ public Hash hashFull (T) (scope const auto ref T record)
 }
 
 /// Ditto
-public void hashPart (T) (scope const auto ref T record, scope HashDg hasher)
+public void hashPart (T) (in T record, scope HashDg hasher)
     /*pure*/ nothrow @nogc
 {
     // Workaround for https://issues.dlang.org/show_bug.cgi?id=21659
@@ -214,7 +214,7 @@ public void hashPart (T) (scope const auto ref T record, scope HashDg hasher)
 
 *******************************************************************************/
 
-private void hashVarInt (T) (const T var, scope HashDg hasher)
+private void hashVarInt (T) (in T var, scope HashDg hasher)
     @trusted @nogc
     if (isUnsigned!T)
 {
