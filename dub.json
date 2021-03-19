@@ -3,7 +3,7 @@
     "description": "Library for cryptographic functions used by the BOA blockchain.",
 
     "license": "MIT",
-    "authors": [ "BPF Korea" ],
+    "authors": [ "BOS Platform Foundation" ],
     "copyright": "Copyright © 2021, BPF Korea",
 
     "targetType": "library",

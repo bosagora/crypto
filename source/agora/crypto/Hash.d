@@ -29,7 +29,7 @@
     - Indirections / references types
 
     Copyright:
-        Copyright (c) 2019 BOS Platform Foundation Korea
+        Copyright (c) 2019-2021 BOS Platform Foundation
         All rights reserved.
 
     License:
@@ -361,8 +361,8 @@ nothrow @nogc @safe unittest
         }
     }
 
-    auto hash_1 = hashMulti(420, "bpfk", S('a', 0, 'b', 0, 'c', 0));
-    auto hash_2 = hashMulti(420, "bpfk", S('a', 1, 'b', 2, 'c', 3));
+    auto hash_1 = hashMulti(420, "bosagora", S('a', 0, 'b', 0, 'c', 0));
+    auto hash_2 = hashMulti(420, "bosagora", S('a', 1, 'b', 2, 'c', 3));
     assert(hash_1 == hash_2);
 
     static struct X
@@ -380,7 +380,7 @@ nothrow @nogc @safe unittest
 
     Wrapper to hash an array of `ubyte[]` without its length
 
-    Since bpfkorea/crypto#11, arrays are hashed with their length to prevent
+    Since bosagora/crypto#11, arrays are hashed with their length to prevent
     vulnerabilities when two arrays are next to one another in a struct.
     However, sometimes this behavior is not desireable, in which case this
     struct can be used as a simple wrapper around the binary representation.
@@ -441,7 +441,7 @@ unittest
     assert(hash_x1 == hash_x2, "Hash of struct in an array with computeHash failed");
 }
 
-// https://github.com/bpfkorea/agora/issues/1331
+// https://github.com/bosagora/agora/issues/1331
 unittest
 {
     import std.format;
