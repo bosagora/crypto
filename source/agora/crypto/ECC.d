@@ -190,6 +190,12 @@ public struct Scalar
         assert(format("%x", s) == ClearText[2 .. $]);
     }
 
+    /// Vibe.d deserialization
+    public static Scalar fromString (in char[] str)
+    {
+        return Scalar(typeof(this.data).fromString(str));
+    }
+
     nothrow @nogc:
 
     private this (typeof(this.data) data) inout pure
@@ -226,12 +232,6 @@ public struct Scalar
         static assert(typeof(data).sizeof == 32);
         static assert(Hash.sizeof == 64);
         crypto_core_ed25519_scalar_reduce(this.data[].ptr, param[].ptr);
-    }
-
-    /// Vibe.d deserialization
-    public static Scalar fromString (in char[] str)
-    {
-        return Scalar(typeof(this.data).fromString(str));
     }
 
     /// Operator overloads for `+`, `-`, `*`
@@ -378,6 +378,12 @@ public struct Point
         return this.data.toString();
     }
 
+    /// Vibe.d deserialization
+    public static Point fromString (in char[] str)
+    {
+        return Point(typeof(this.data).fromString(str));
+    }
+
     nothrow @nogc:
 
     private this (typeof(this.data) data) inout pure
@@ -407,12 +413,6 @@ public struct Point
         const from_ubytes = Point([204, 70, 146, 92, 85, 207, 248, 193, 36, 92, 220, 216, 252, 242, 170, 37, 89, 67, 175, 116, 170, 18, 89, 113, 241, 8, 132, 47, 250, 62, 184, 130]);
         auto from_hex_str = Point("0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693");
 
-    }
-
-    /// Vibe.d deserialization
-    public static Point fromString (in char[] str)
-    {
-        return Point(typeof(this.data).fromString(str));
     }
 
     /// Operator overloads for points additions
