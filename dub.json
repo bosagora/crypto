@@ -15,7 +15,7 @@
     },
 
     "dependencies": {
-        "bitblob":    { "version": "~>2.1",          "dflags": [ "-preview=in" ] },
+        "bitblob":    { "version": "~>2.2",          "dflags": [ "-preview=in" ] },
         "libsodiumd": { "version": "~>0.1.1+1.0.18", "dflags": [ "-preview=in" ] }
     }
 }
