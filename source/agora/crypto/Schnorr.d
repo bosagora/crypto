@@ -419,8 +419,9 @@ nothrow @nogc @safe unittest
 }
 
 /// multi-sig combine
-public Signature multiSigCombine (S)(const S sigs) nothrow @nogc @safe
+public Signature multiSigCombine (S)(S sigs) nothrow @nogc @safe
 {
+    static assert(isInputRange!S);
     Point sum_R = sigs.map!(x => x.R).sum(Point.init);
     Scalar sum_s = sigs.map!(x => x.s).sum(Scalar.init);
     return Signature(sum_R, sum_s);
@@ -459,6 +460,11 @@ public Signature multiSigCombine (S)(const S sigs) nothrow @nogc @safe
 
     // "multi-sig" - collection of one or more signatures
     Signature two_sigs = multiSigCombine([ sig1, sig2 ]);
+
+    // should also work with ranges
+    assert(multiSigCombine(sig1.only.chain(sig2.only)) == two_sigs);
+    Signature[int] map = [1: sig1, 2: sig2];
+    assert(multiSigCombine(map.byValue) == two_sigs);
 
     // verification of two combined signatures
     assert(verify(two_sigs, c, kp1_X.V + kp2_X.V));
