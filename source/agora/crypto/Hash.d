@@ -61,7 +61,8 @@ nothrow @nogc @safe unittest
         string bar;
         ulong foo;
 
-        void computeHash (scope HashDg dg) const nothrow @safe @nogc
+        void computeHash (scope HashDg dg) const scope
+            @safe pure nothrow @nogc
         {
             // We can hash in any order we want, and ignore anything we want
             hashPart(this.foo, dg);
@@ -85,7 +86,7 @@ nothrow @nogc @safe unittest
 }
 
 /// Type of delegate passed to `hash` function when there's a state
-public alias HashDg = void delegate(in ubyte[]) /*pure*/ nothrow @safe @nogc;
+public alias HashDg = void delegate(in ubyte[]) @safe pure nothrow @nogc;
 
 /// Traits to check if a given type has a custom hashing routine
 private enum hasComputeHashMethod (T) = is(T == struct)
@@ -109,7 +110,7 @@ private enum hasComputeHashMethod (T) = is(T == struct)
 *******************************************************************************/
 
 public Hash hashFull (T) (in T record)
-    nothrow @nogc @trusted
+    @trusted pure nothrow @nogc
 {
     Hash hash = void;
     crypto_generichash_state state;
@@ -124,7 +125,7 @@ public Hash hashFull (T) (in T record)
 
 /// Ditto
 public void hashPart (T) (in T record, scope HashDg hasher)
-    /*pure*/ nothrow @nogc
+    pure nothrow @nogc
 {
     // Workaround for https://issues.dlang.org/show_bug.cgi?id=21659
     // It will be fixed in v2.096.0.
@@ -215,7 +216,7 @@ public void hashPart (T) (in T record, scope HashDg hasher)
 *******************************************************************************/
 
 private void hashVarInt (T) (in T var, scope HashDg hasher)
-    @trusted @nogc
+    @trusted pure nothrow @nogc
     if (isUnsigned!T)
 {
     assert(var >= 0);
@@ -252,7 +253,7 @@ unittest
                                                       "410c64a6334e044508855e86e3c51ca53903371937edfeb8a74fa6a848baae93f");
 }
 // Test that the implementation actually matches what the RFC gives
-nothrow @nogc @safe unittest
+@safe pure nothrow @nogc unittest
 {
     // https://tools.ietf.org/html/rfc7693#appendix-A
     static immutable ubyte[] hdata = [
@@ -286,7 +287,8 @@ nothrow @nogc @safe unittest
         public char c2;
         private string baguette;
 
-        public void computeHash (scope HashDg dg) const nothrow @safe @nogc
+        public void computeHash (scope HashDg dg) const scope
+            @safe pure nothrow @nogc
         {
             // We can hash in any order we want so lets reverse the order and skip some fields
             hashPart(this.c2, dg);
@@ -311,26 +313,20 @@ nothrow @nogc @safe unittest
 
 *******************************************************************************/
 
-public Hash hashMulti (T...)(auto ref T args) nothrow @nogc @safe
+public Hash hashMulti (T...)(auto ref T args) @safe nothrow @nogc
 {
     Hash hash = void;
     crypto_generichash_state state;
 
-    auto dg = () @trusted {
-        crypto_generichash_init(&state, null, 0, Hash.sizeof);
-        scope HashDg dg = (in ubyte[] data) @trusted {
-            crypto_generichash_update(&state, data.ptr, data.length);
-        };
-        return dg;
-    }();
+    crypto_generichash_init(state, null, Hash.sizeof);
+    scope HashDg dg = (in ubyte[] data) {
+        crypto_generichash_update(state, data);
+    };
 
     static foreach (idx, _; args)
         hashPart(args[idx], dg);
-    void trusted () @trusted
-    {
-        crypto_generichash_final(&state, hash[].ptr, Hash.sizeof);
-    }
-    trusted();
+
+    crypto_generichash_final(state, hash[]);
     return hash;
 }
 
@@ -353,7 +349,8 @@ nothrow @nogc @safe unittest
         public char c2;
         private int unused_3;
 
-        public void computeHash (scope HashDg dg) const nothrow @safe @nogc
+        public void computeHash (scope HashDg dg) const scope
+            @safe pure nothrow @nogc
         {
             hashPart(this.c0, dg);
             hashPart(this.c1, dg);
@@ -392,7 +389,8 @@ public struct HashNoLength
     public const(ubyte)[] data;
 
     ///
-    public void computeHash (scope HashDg dg) const nothrow @safe @nogc
+    public void computeHash (scope HashDg dg) const scope
+        @safe pure nothrow @nogc
     {
         dg(this.data);
     }
@@ -416,7 +414,8 @@ unittest
         private int unused_1;
         public char c1;
 
-        public void computeHash (scope HashDg dg) const nothrow @safe @nogc
+        public void computeHash (scope HashDg dg) const scope
+            @safe pure nothrow @nogc
         {
             hashPart(this.c0, dg);
             hashPart(this.c1, dg);
@@ -464,7 +463,8 @@ unittest
     {
         Hash value;
 
-        public void computeHash (scope HashDg dg) const nothrow @trusted @nogc
+        public void computeHash (scope HashDg dg) const scope
+            @trusted pure nothrow @nogc
         {
             foreach (ubyte b; value[])
                 dg((&b)[0 .. 1]);
