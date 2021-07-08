@@ -142,17 +142,15 @@ public struct Signature
         assert(signature.toString() == "0x921405afbfa97813293770efd55865c01055f39ad2a70f2b7a04ac043766a693074360d5eab8e888df07d862c4fc845ebd10b6a6c530919d66221219bba50216", signature.toString());
     }
 
-    nothrow @nogc:
-
     /// construct from Point and Scalar
-    public this (in Point R, in Scalar s) pure
+    public this (in Point R, in Scalar s) pure nothrow @nogc
     {
         this.R = R;
         this.s = s;
     }
 
     /// Construct from a dynamic array of the correct length
-    public this (in ubyte[Signature.sizeof] param) inout pure
+    public this (in ubyte[Signature.sizeof] param) inout pure nothrow @nogc
     {
         this.R = param[0 .. param.sizeof / 2];
         this.s = param[param.sizeof / 2 .. param.sizeof];
@@ -164,7 +162,7 @@ public struct Signature
         import geod24.bitblob;
 
         // the bytes are little endian
-        const bytes = BitBlob!(Signature.sizeof)(hex_str);
+        const bytes = BitBlob!(Signature.sizeof).fromString(hex_str);
         const Scalar s = bytes[0 .. Scalar.sizeof];
         const Point R = bytes[Scalar.sizeof .. $];
         return Signature(R, s);
