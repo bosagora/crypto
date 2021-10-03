@@ -228,7 +228,7 @@ public Signature sign (T) (
       c := Hash(X || R || message)
 
       Proof = (R, s)
-      Signature/Verify: R + c*X == s.G
+      Signature/Verify: c*R + X == s.G
       Multisig:
       R = (r0 + r1 + rn).G == (R0 + R1 + Rn)
       X = (X0 + X1 + Xn)
@@ -249,14 +249,13 @@ public Signature sign (in Scalar x, in Point R, in Scalar r, in Scalar c)
       46316835694926478169428394003475163141307993866256225615783033603165251855960
       x := private key
       r := random noise private
-      r := random noise p
       c := hashed message
 
       Proof = (R, s): R = r.G
-      Signature/Verify: R + c*X == s.G
+      Signature/Verify: c*R + X == s.G
      */
     // Compute `s` part of the proof
-    Scalar s = r + (c * x);
+    Scalar s = c * r + x;
     return Signature(R, s);
 }
 /*******************************************************************************
@@ -296,7 +295,7 @@ public bool verify (in Signature sig, in Scalar c, in Point X)
     if (!sig.R.isValid())
         return false;
     // Compute `R + c*X`
-    Point RcX = sig.R + (c * X);
+    Point RcX = c * sig.R + X;
     return S == RcX;
 }
 
@@ -498,10 +497,10 @@ public Signature multiSigCombine (S)(S sigs) nothrow @nogc @safe
     auto X = kp1.V + kp2.V;
     Scalar c = hashMulti(X, R, message);  // challenge
 
-    Scalar s1 = R1.v + (kp1.v * c);
-    Scalar s2 = R2.v + (kp2.v * c);
+    Scalar s1 = c * R1.v + kp1.v;
+    Scalar s2 = c * R2.v + kp2.v;
     Scalar multi_sig = s1 + s2;
-    assert(multi_sig.toPoint() == R + (X * c));
+    assert(multi_sig.toPoint() == c * R + X);
 
     // now assume that bob lied about his V and R during the co-operative phase.
     auto bobV = kp2.V - kp1.V;
@@ -511,8 +510,8 @@ public Signature multiSigCombine (S)(S sigs) nothrow @nogc @safe
     c = Scalar(hashMulti(X, R, message));
 
     // bob signed the message alone, without co-operation from alice. it passes!
-    Scalar bob_sig = R2.v + (kp2.v * c);
-    assert(bob_sig.toPoint() == R + (X * c));
+    Scalar bob_sig = c * R2.v + kp2.v;
+    assert(bob_sig.toPoint() == c * R + X);
 }
 
 // ditto, but using multi-sig
@@ -524,11 +523,11 @@ public Signature multiSigCombine (S)(S sigs) nothrow @nogc @safe
 
     Pair kp_1 = Pair.random();  // key-pair
     Pair Rp_1 = Pair.random();  // (R, r), the public and private nonce
-    Scalar s_1 = Rp_1.v + (kp_1.v * c);  // signature
+    Scalar s_1 = c * Rp_1.v + kp_1.v;  // signature
 
     Pair kp_2 = Pair.random();  // key-pair
     Pair Rp_2 = Pair.random();  // (R, r), the public and private nonce
-    Scalar s_2 = Rp_2.v + (kp_2.v * c);  // signature
+    Scalar s_2 = c * Rp_2.v + kp_2.v;  // signature
 
     // known public data of the nodes
     Point K_1 = kp_1.V;
@@ -538,16 +537,16 @@ public Signature multiSigCombine (S)(S sigs) nothrow @nogc @safe
     Point R_2 = Rp_2.V;
 
     // verification of individual signatures
-    assert(s_1.toPoint() == R_1 + (K_1 * c));
-    assert(s_2.toPoint() == R_2 + (K_2 * c));
+    assert(s_1.toPoint() == c * R_1 + K_1);
+    assert(s_2.toPoint() == c * R_2 + K_2);
 
     // "multi-sig" - collection of one or more signatures
     auto sum_s = s_1 + s_2;
     assert(sum_s.toPoint() ==
-        (R_1 + (K_1 * c)) +
-        (R_2 + (K_2 * c)));
+        (c * R_1 + K_1) +
+        (c * R_2 + K_2));
 
     // Or the equivalent:
     assert(sum_s.toPoint() ==
-        (R_1 + R_2) + (K_1 * c) + (K_2 * c));
+        c * (R_1 + R_2) + K_1 + K_2);
 }
