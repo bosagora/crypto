@@ -38,6 +38,12 @@ nothrow @nogc unittest
     assert(-s3 == -s1 - s2);
     assert(-s3 == -s2 - s1);
 
+    Scalar s4 = s1;
+    s4 += s2;
+    assert(s4 == s3);
+    s4 -= s1;
+    assert(s4 == s2);
+
     const Scalar Zero = (s3 + (-s3));
     assert(Zero == Scalar.init);
 
@@ -59,6 +65,13 @@ nothrow @nogc unittest
     assert(s1.toPoint() == p1);
     assert(p3 - p1 == p2);
     assert(p3 - p2 == p1);
+
+    Point p4 = p1;
+    p4 += p2;
+    assert(p4 == p3);
+    p4 -= p1;
+    assert(p4 == p2);
+    p4 *= s1;
 
     assert(s1 * p2 + s2 * p2 == s3 * p2);
 
@@ -257,6 +270,13 @@ public struct Scalar
         return result;
     }
 
+    /// Operator overloads for `+=` & other supported binary operations
+    public ref Scalar opOpAssign (string op)(in Scalar rhs) return @safe
+    {
+        this.data = this.opBinary!op(rhs).data;
+        return this;
+    }
+
     /// Get the complement of this scalar
     public Scalar opUnary (string s) () const @trusted
     {
@@ -441,6 +461,14 @@ public struct Point
         return result;
     }
 
+    /// Operator overloads for supported binary operations on points
+    public ref Point opOpAssign (string op)(in Point rhs) return @safe
+        if (op == "+" || op == "-")
+    {
+        this.data = this.opBinary!op(rhs).data;
+        return this;
+    }
+
     /// Operator overloads for scalar multiplication
     public Point opBinary (string op)(in Scalar rhs) const @trusted
         if (op == "*")
@@ -461,6 +489,14 @@ public struct Point
                 result.data[].ptr, lhs.data[].ptr, this.data[].ptr))
             assert(0);
         return result;
+    }
+
+    /// Operator overloads for supported binary operations on Scalars
+    public ref Point opOpAssign (string op)(in Scalar rhs) return @safe
+        if (op == "*")
+    {
+        this.data = this.opBinary!op(rhs).data;
+        return this;
     }
 
     /// Convenience overload to allow this to be passed to libsodium & co
