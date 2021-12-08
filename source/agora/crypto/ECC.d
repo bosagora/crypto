@@ -142,7 +142,7 @@ public struct Scalar
 
     ***************************************************************************/
 
-    public void toString (scope void delegate(scope const(char)[]) @safe sink)
+    public void toString (scope void delegate(in char[]) @safe sink)
         const
     {
         FormatSpec!char spec;
@@ -150,7 +150,7 @@ public struct Scalar
     }
 
     /// Ditto
-    public void toString (scope void delegate(scope const(char)[]) @safe sink,
+    public void toString (scope void delegate(in char[]) @safe sink,
                           in FormatSpec!char spec) const
     {
         switch (spec.spec)
@@ -180,7 +180,7 @@ public struct Scalar
         string result;
         FormatSpec!char spec;
         spec.spec = (mode == PrintMode.Clear) ? 'c' : 's';
-        this.toString((scope data) { result ~= data; }, spec);
+        this.toString((in data) { result ~= data; }, spec);
         return result;
     }
 
@@ -386,7 +386,7 @@ public struct Point
     package BitBlob!(crypto_core_ed25519_BYTES) data;
 
     /// Expose `toString`
-    public void toString (scope void delegate(scope const(char)[]) @safe dg)
+    public void toString (scope void delegate(in char[]) @safe dg)
         const
     {
         this.data.toString(dg);

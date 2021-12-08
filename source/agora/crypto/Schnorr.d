@@ -117,7 +117,7 @@ public struct Signature
 
     ***************************************************************************/
 
-    public void toString (scope void delegate(scope const(char)[]) @safe sink) const
+    public void toString (scope void delegate(in char[]) @safe sink) const
     {
         this.R.data.toString(sink);
         FormatSpec!char spec;
@@ -129,7 +129,7 @@ public struct Signature
     public string toString () const
     {
         string result;
-        this.toString((scope data) { result ~= data; });
+        this.toString((in data) { result ~= data; });
         return result;
     }
 
