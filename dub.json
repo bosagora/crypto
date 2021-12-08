@@ -9,13 +9,13 @@
     "targetType": "library",
     "toolchainRequirements": {
         "dub": ">=1.24.0",
-        "dmd": ">=2.095.0",
+        "dmd": ">=2.097.0",
         "gdc": "no",
-        "ldc": "~>1.25"
+        "ldc": "~>1.28"
     },
 
     "dependencies": {
-        "bitblob":    { "version": "~>2.2",          "dflags": [ "-preview=in" ] },
+        "bitblob":    { "version": "~>2.3",          "dflags": [ "-preview=in" ] },
         "libsodiumd": { "version": "~>0.2.0+1.0.18", "dflags": [ "-preview=in" ] }
     }
 }
