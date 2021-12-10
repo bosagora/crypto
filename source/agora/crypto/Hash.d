@@ -331,7 +331,7 @@ unittest
 
 *******************************************************************************/
 
-public Hash hashMulti (T...)(auto ref T args) @safe nothrow @nogc
+public Hash hashMulti (T...)(auto ref T args, ulong _magic = magic) @safe pure nothrow @nogc
 {
     Hash hash = void;
     crypto_generichash_state state;
@@ -341,7 +341,7 @@ public Hash hashMulti (T...)(auto ref T args) @safe nothrow @nogc
         crypto_generichash_update(state, data);
     };
 
-    hashPart(magic, dg);
+    hashPart(_magic, dg);
     static foreach (idx, _; args)
         hashPart(args[idx], dg);
 
@@ -352,6 +352,7 @@ public Hash hashMulti (T...)(auto ref T args) @safe nothrow @nogc
 ///
 nothrow @nogc @safe unittest
 {
+    setHashMagic(0xDEADBEEF);
     struct T
     {
         string foo;
