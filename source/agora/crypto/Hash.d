@@ -111,7 +111,8 @@ public void setHashMagic (ulong val) @safe nothrow @nogc
     Params:
       T = Type of struct to hash
       record = Instance of `T` to hash
-      hasher = State delegate, when this struct is nested in another.
+      hash_magic = if _magic will be included in the hash
+      _magic = magic number to be hashed together with `record``
 
     Returns:
       The `Hash` representing this instance
@@ -325,6 +326,7 @@ unittest
     Params:
         T = variadic argument types
         args = the arguments
+        _magic = magic number to be hashed together with `args`
 
     Returns:
         the hash of all the arguments
