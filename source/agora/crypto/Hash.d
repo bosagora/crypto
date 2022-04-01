@@ -120,18 +120,21 @@ public void setHashMagic (ulong val) @safe nothrow @nogc
 *******************************************************************************/
 
 public Hash hashFull (T) (in T record, bool hash_magic = true, ulong _magic = magic)
-    @trusted pure nothrow @nogc
+    @safe pure nothrow @nogc
 {
     Hash hash = void;
     crypto_generichash_state state;
-    crypto_generichash_init(&state, null, 0, Hash.sizeof);
-    scope HashDg dg = (in ubyte[] data) @trusted {
-        crypto_generichash_update(&state, data.ptr, data.length);
+
+    crypto_generichash_init(state, null, Hash.sizeof);
+    scope HashDg dg = (in ubyte[] data) {
+        crypto_generichash_update(state, data);
     };
+
     if (hash_magic)
         hashPart(_magic, dg);
+
     hashPart(record, dg);
-    crypto_generichash_final(&state, hash[].ptr, Hash.sizeof);
+    crypto_generichash_final(state, hash[]);
     return hash;
 }
 
@@ -198,7 +201,7 @@ public void hashPart (T) (in T record, scope HashDg hasher)
         }
     }
     else static if (is(immutable(ubyte) == immutable(T)))
-        hasher((cast(ubyte*)&record)[0 .. ubyte.sizeof]);
+        () @trusted { hasher((cast(ubyte*)&record)[0 .. ubyte.sizeof]); }();
     else static if (is(immutable(T) == immutable(__c_ulonglong)))
     {
         static assert(__c_ulonglong.sizeof == ulong.sizeof);
